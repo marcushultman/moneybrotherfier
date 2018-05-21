@@ -1,0 +1,8 @@
+{
+  "name": "moneybrotherfier",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:marcushultman/moneybrotherfier.git",
+  "author": "Marcus Hultman <marcus.hultman1@gmail.com>",
+  "license": "MIT"
+}
