@@ -17,16 +17,30 @@ function getAngleBetweenEyes(face) {
   return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * 180 / Math.PI;
 }
 
+function distanceToMustasche(face) {
+  return face.landmarks.find(e => e.type === 'UPPER_LIP').position.y;
+}
+
+function distanceToNosebone(face) {
+  const leftEyeY = face.landmarks.find(e => e.type === 'LEFT_EYE').position.y;
+  const rightEyeY = face.landmarks.find(e => e.type === 'RIGHT_EYE').position.y;
+  return .25 * leftEyeY + .25 * rightEyeY + .5 * distanceToMustasche(face);
+}
+
 function moneybrotherfy(imageFile, face) {
   const angle = getAngleBetweenEyes(face);
   const outFile = `${imageFile}-brother.jpg`;
   return new Promise((resolve, reject) => jimp.read(imageFile, (err, brother) => {
     err ? reject(err) : resolve(brother);
   }))
-  .then(image => new Promise((resolve, reject) => image
-      .rotate(-angle, true)
-      .blit(image.clone(), 0, 400)
-      .write(outFile, () => resolve(image))))
+  .then(image => new Promise((resolve, reject) => {
+    const { width, height } = image.bitmap;
+    image
+      .blit(image.clone(), 0, distanceToNosebone(face), 0, distanceToMustasche(face), width, height)
+      .rotate(angle, true)
+      .autocrop()
+      .write(outFile, () => resolve(image));
+  }))
   .then(() => outFile);
 }
 
