@@ -7,9 +7,9 @@ const jimp = require("jimp");
 const upload = multer({ dest: '/tmp/moneybrotherfier' });
 
 const app = express();
-const client = new vision.ImageAnnotatorClient({
-  keyFilename: __dirname + '/moneybrotherfier-gcp.json',
-});
+const client = process.env.GOOGLE_APPLICATION_CREDENTIALS
+    ? new vision.ImageAnnotatorClient({ credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS) })
+    : new vision.ImageAnnotatorClient({ keyFilename: __dirname + '/moneybrotherfier-gcp.json' });
 
 function getAngleBetweenEyes(face) {
   const leftEye = face.landmarks.find(e => e.type === 'LEFT_EYE').position;
