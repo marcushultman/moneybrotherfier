@@ -11,13 +11,20 @@ const client = new vision.ImageAnnotatorClient({
   keyFilename: __dirname + '/moneybrotherfier-gcp.json',
 });
 
+function getAngleBetweenEyes(face) {
+  const leftEye = face.landmarks.find(e => e.type === 'LEFT_EYE').position;
+  const rightEye = face.landmarks.find(e => e.type === 'RIGHT_EYE').position;
+  return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * 180 / Math.PI;
+}
+
 function moneybrotherfy(imageFile, face) {
   return new Promise((resolve, reject) => jimp.read(imageFile, (err, brother) => {
     err ? reject(err) : resolve(brother);
   }))
   .then(image => {
     const outFile = `${imageFile}-brother.jpg`;
-    image.rotate(45, true)
+    const angle = getAngleBetweenEyes(face);
+    image.rotate(-angle, true)
         .write(outFile);
     return outFile;
   });
