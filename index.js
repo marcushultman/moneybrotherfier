@@ -12,8 +12,15 @@ const client = new vision.ImageAnnotatorClient({
 });
 
 function moneybrotherfy(imageFile, face) {
-  // todo: moneybrotherfy image
-  return Promise.resolve(imageFile);
+  return new Promise((resolve, reject) => jimp.read(imageFile, (err, brother) => {
+    err ? reject(err) : resolve(brother);
+  }))
+  .then(image => {
+    const outFile = `${imageFile}-brother.jpg`;
+    image.rotate(45, true)
+        .write(outFile);
+    return outFile;
+  });
 }
 
 app.post('/transform', upload.single('brother'), (req, res, next) => {
