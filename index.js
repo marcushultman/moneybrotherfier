@@ -33,4 +33,6 @@ app.post('/transform', upload.single('brother'), (req, res, next) => {
   .catch(err => next(err));
 });
 
+app.use(express.static('src'));
+
 app.listen(5010);
