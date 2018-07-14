@@ -65,4 +65,4 @@ app.post('/transform', upload.single('brother'), (req, res, next) => {
 
 app.use(express.static('src'));
 
-app.listen(5010);
+app.listen(process.env.PORT || 5010);
