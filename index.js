@@ -2,6 +2,8 @@ const express = require('express');
 const multer  = require('multer');
 const vision = require('@google-cloud/vision');
 
+const jimp = require("jimp");
+
 const upload = multer({ dest: '/tmp/moneybrotherfier' });
 
 const app = express();
