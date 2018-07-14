@@ -14,24 +14,31 @@ const client = process.env.GOOGLE_APPLICATION_CREDENTIALS
 function getAngleBetweenEyes(face) {
   const leftEye = face.landmarks.find(e => e.type === 'LEFT_EYE').position;
   const rightEye = face.landmarks.find(e => e.type === 'RIGHT_EYE').position;
-  return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * 180 / Math.PI;
+  return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) ;
 }
 
 function distanceToMustasche(image, face) {
-  const lipY = face.landmarks.find(e => e.type === 'UPPER_LIP').position.y;
+  const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
+  const lipXLocationRatio = lip.x / image.bitmap.width;
   const angle = getAngleBetweenEyes(face);
-  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width);
-  return lipY + imageOffset;
+  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width * lipXLocationRatio);
+  return lip.y + imageOffset;
 }
 
-function distanceToNosebone(face) {
+function distanceToNosebone(image, face) {
   const leftEyeY = face.landmarks.find(e => e.type === 'LEFT_EYE').position.y;
   const rightEyeY = face.landmarks.find(e => e.type === 'RIGHT_EYE').position.y;
-  return .25 * leftEyeY + .25 * rightEyeY + .5 * distanceToMustasche(face);
+  const lip = face.landmarks.find(e => e.type=== 'UPPER_LIP').position;
+  const distance = .25 * leftEyeY + .25 * rightEyeY + .5 * lip.y;
+
+  const angle = getAngleBetweenEyes(face);
+  const lipXLocationRatio = lip.x / image.bitmap.width;
+  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width * lipXLocationRatio);
+  return distance + imageOffset;
 }
 
 function moneybrotherfy(imageFile, face) {
-  const angle = getAngleBetweenEyes(face);
+  const angle = getAngleBetweenEyes(face) * 180 / Math.PI;
   const outFile = `${imageFile}-brother.jpg`;
   return new Promise((resolve, reject) => jimp.read(imageFile, (err, brother) => {
     err ? reject(err) : resolve(brother);
@@ -40,7 +47,7 @@ function moneybrotherfy(imageFile, face) {
     const { width, height } = image.bitmap;
     image
       .rotate(-angle, true)
-      .blit(image.clone(), 0, distanceToNosebone(face), 0, distanceToMustasche(image, face), width, height)
+      .blit(image.clone(), 0, distanceToNosebone(image, face), 0, distanceToMustasche(image, face), width, height)
       .rotate(angle, true)
       .autocrop()
       .write(outFile, () => resolve(image));
