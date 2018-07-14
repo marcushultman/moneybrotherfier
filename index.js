@@ -18,16 +18,16 @@ function getAngleBetweenEyes(face) {
 }
 
 function moneybrotherfy(imageFile, face) {
+  const angle = getAngleBetweenEyes(face);
+  const outFile = `${imageFile}-brother.jpg`;
   return new Promise((resolve, reject) => jimp.read(imageFile, (err, brother) => {
     err ? reject(err) : resolve(brother);
   }))
-  .then(image => {
-    const outFile = `${imageFile}-brother.jpg`;
-    const angle = getAngleBetweenEyes(face);
-    image.rotate(-angle, true)
-        .write(outFile);
-    return outFile;
-  });
+  .then(image => new Promise((resolve, reject) => image
+      .rotate(-angle, true)
+      .blit(image.clone(), 0, 400)
+      .write(outFile, () => resolve(image))))
+  .then(() => outFile);
 }
 
 app.post('/transform', upload.single('brother'), (req, res, next) => {
