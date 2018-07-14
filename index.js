@@ -17,8 +17,11 @@ function getAngleBetweenEyes(face) {
   return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * 180 / Math.PI;
 }
 
-function distanceToMustasche(face) {
-  return face.landmarks.find(e => e.type === 'UPPER_LIP').position.y;
+function distanceToMustasche(image, face) {
+  const lipY = face.landmarks.find(e => e.type === 'UPPER_LIP').position.y;
+  const angle = getAngleBetweenEyes(face);
+  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width);
+  return lipY + imageOffset;
 }
 
 function distanceToNosebone(face) {
@@ -36,7 +39,8 @@ function moneybrotherfy(imageFile, face) {
   .then(image => new Promise((resolve, reject) => {
     const { width, height } = image.bitmap;
     image
-      .blit(image.clone(), 0, distanceToNosebone(face), 0, distanceToMustasche(face), width, height)
+      .rotate(-angle, true)
+      .blit(image.clone(), 0, distanceToNosebone(face), 0, distanceToMustasche(image, face), width, height)
       .rotate(angle, true)
       .autocrop()
       .write(outFile, () => resolve(image));
