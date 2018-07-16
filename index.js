@@ -26,18 +26,18 @@ function getRotatedYPos({ x, y }, face) {
   return y + Math.abs(Math.tan(getAngleBetweenEyes(face)) * x);
 }
 
-function mustascheYPos(face, scale) {
-  const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
-  const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
-  const mustasche = add2(mul(.5 * scale, noseTip), mul(.5 * scale, lip));
-  return getRotatedYPos(mustasche, face);
-}
-
 function noseboneYPos(face, scale) {
   const eyeCenter = face.landmarks.find(e => e.type === 'MIDPOINT_BETWEEN_EYES').position;
   const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
   const nosebone = add2(mul(.5 * scale, eyeCenter), mul(.5 * scale, noseTip));
   return getRotatedYPos(nosebone, face);
+}
+
+function mustascheYPos(face, scale) {
+  const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
+  const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
+  const mustasche = add2(mul(.5 * scale, noseTip), mul(.5 * scale, lip));
+  return getRotatedYPos(mustasche, face);
 }
 
 function moneybrotherfy(imageFile, face) {
