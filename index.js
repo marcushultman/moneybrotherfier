@@ -11,6 +11,8 @@ const client = process.env.GOOGLE_APPLICATION_CREDENTIALS
     ? new vision.ImageAnnotatorClient({ credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS) })
     : new vision.ImageAnnotatorClient({ keyFilename: __dirname + '/moneybrotherfier-gcp.json' });
 
+const IMAGE_MAX_SIZE = 640;
+
 function getAngleBetweenEyes(face) {
   const leftEye = face.landmarks.find(e => e.type === 'LEFT_EYE').position;
   const rightEye = face.landmarks.find(e => e.type === 'RIGHT_EYE').position;
@@ -24,19 +26,19 @@ function getOffsettedYForPos({ x, y }, face) {
   return y + Math.abs(Math.tan(getAngleBetweenEyes(face)) * x);
 }
 
-function distanceToMustasche(image, face) {
+function distanceToMustasche(image, face, scale) {
   const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
   const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
 
-  const mustasche = add2(mul(.5, noseTip), mul(.5, lip));
+  const mustasche = add2(mul(.5 * scale, noseTip), mul(.5 * scale, lip));
   return getOffsettedYForPos(mustasche, face);
 }
 
-function distanceToNosebone(image, face) {
+function distanceToNosebone(image, face, scale) {
   const eyeCenter = face.landmarks.find(e => e.type === 'MIDPOINT_BETWEEN_EYES').position;
   const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
 
-  const nosebone = add2(mul(.5, eyeCenter), mul(.5, noseTip));
+  const nosebone = add2(mul(.5 * scale, eyeCenter), mul(.5 * scale, noseTip));
   return getOffsettedYForPos(nosebone, face);
 }
 
@@ -47,10 +49,20 @@ function moneybrotherfy(imageFile, face) {
     err ? reject(err) : resolve(brother);
   }))
   .then(image => new Promise((resolve, reject) => {
-    const { width, height } = image.bitmap;
+    let { width, height } = image.bitmap;
+    const scale = Math.min(Math.max(width, height) / IMAGE_MAX_SIZE, 1.0);
+    width *= scale;
+    height *= scale;
     image
+      .resize(width, height)
       .rotate(-angle, true)
-      .blit(image.clone(), 0, distanceToNosebone(image, face), 0, distanceToMustasche(image, face), width, height)
+      .blit(image.clone(),
+            0,
+            distanceToNosebone(image, face, scale),
+            0,
+            distanceToMustasche(image, face, scale),
+            width,
+            height)
       .rotate(angle, true)
       .autocrop()
       .write(outFile, () => resolve(image));
