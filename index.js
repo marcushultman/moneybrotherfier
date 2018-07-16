@@ -32,9 +32,9 @@ function distanceToMustasche(image, face) {
 function distanceToNosebone(image, face) {
   const leftEye = face.landmarks.find(e => e.type === 'LEFT_EYE').position;
   const rightEye = face.landmarks.find(e => e.type === 'RIGHT_EYE').position;
-  const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
+  const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
 
-  const nosebone = add3(mul(.25, leftEye), mul(.25, rightEye), mul(.5, lip));
+  const nosebone = add3(mul(.25, leftEye), mul(.25, rightEye), mul(.5, noseTip));
   return getOffsettedYForPos(nosebone, face);
 }
 
