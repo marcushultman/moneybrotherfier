@@ -25,11 +25,11 @@ function getCenterOfTwoPoints(p1, p2, angle){
 }
 
 function distanceToMustasche(image, face) {
+  const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
   const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
-  const lipXLocationRatio = lip.x / image.bitmap.width;
   const angle = getAngleBetweenEyes(face);
-  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width * lipXLocationRatio);
-  return lip.y + imageOffset;
+  const {x, y} = getCenterOfTwoPoints(noseTip, lip, angle);
+  return y;
 }
 
 function distanceToNosebone(image, face) {
