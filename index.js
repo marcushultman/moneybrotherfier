@@ -22,24 +22,22 @@ function getAngleBetweenEyes(face) {
 const add2 = (v1, v2) => ({ x: v1.x + v2.x, y: v1.y + v2.y });
 const mul = (d, { x, y }) => ({ x: x * d, y: y * d });
 
-function getOffsettedYForPos({ x, y }, face) {
+function getRotatedYPos({ x, y }, face) {
   return y + Math.abs(Math.tan(getAngleBetweenEyes(face)) * x);
 }
 
-function distanceToMustasche(face, scale) {
+function mustascheYPos(face, scale) {
   const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
   const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
-
   const mustasche = add2(mul(.5 * scale, noseTip), mul(.5 * scale, lip));
-  return getOffsettedYForPos(mustasche, face);
+  return getRotatedYPos(mustasche, face);
 }
 
-function distanceToNosebone(face, scale) {
+function noseboneYPos(face, scale) {
   const eyeCenter = face.landmarks.find(e => e.type === 'MIDPOINT_BETWEEN_EYES').position;
   const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
-
   const nosebone = add2(mul(.5 * scale, eyeCenter), mul(.5 * scale, noseTip));
-  return getOffsettedYForPos(nosebone, face);
+  return getRotatedYPos(nosebone, face);
 }
 
 function moneybrotherfy(imageFile, face) {
@@ -58,9 +56,9 @@ function moneybrotherfy(imageFile, face) {
       .rotate(-angle, true)
       .blit(image.clone(),
             0,
-            distanceToNosebone(face, scale),
+            noseboneYPos(face, scale),
             0,
-            distanceToMustasche(face, scale),
+            mustascheYPos(face, scale),
             width,
             height)
       .rotate(angle, true)
