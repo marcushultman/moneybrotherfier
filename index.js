@@ -17,7 +17,7 @@ function getAngleBetweenEyes(face) {
   return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
 }
 
-const add3 = (v1, v2, v3) => ({ x: v1.x + v2.x + v3.x, y: v1.y + v2.y + v3.y });
+const add2 = (v1, v2) => ({ x: v1.x + v2.x, y: v1.y + v2.y });
 const mul = (d, { x, y }) => ({ x: x * d, y: y * d });
 
 function getOffsettedYForPos({ x, y }, face) {
@@ -30,11 +30,10 @@ function distanceToMustasche(image, face) {
 }
 
 function distanceToNosebone(image, face) {
-  const leftEye = face.landmarks.find(e => e.type === 'LEFT_EYE').position;
-  const rightEye = face.landmarks.find(e => e.type === 'RIGHT_EYE').position;
+  const eyeCenter = face.landmarks.find(e => e.type === 'MIDPOINT_BETWEEN_EYES').position;
   const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
 
-  const nosebone = add3(mul(.25, leftEye), mul(.25, rightEye), mul(.5, noseTip));
+  const nosebone = add2(mul(.5, eyeCenter), mul(.5, noseTip));
   return getOffsettedYForPos(nosebone, face);
 }
 
