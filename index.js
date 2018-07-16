@@ -17,6 +17,13 @@ function getAngleBetweenEyes(face) {
   return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) ;
 }
 
+function getCenterOfTwoPoints(p1, p2, angle){
+  const baseY = .5 * p1.y+ .5 * p2.y;
+  const averageX = (p1.x + p1.x) / 2;
+  const imageOffset = Math.abs(Math.tan(angle) * averageX );
+  return { x: averageX, y: baseY + imageOffset};
+}
+
 function distanceToMustasche(image, face) {
   const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
   const lipXLocationRatio = lip.x / image.bitmap.width;
@@ -26,14 +33,11 @@ function distanceToMustasche(image, face) {
 }
 
 function distanceToNosebone(image, face) {
-  const leftEyeY = face.landmarks.find(e => e.type === 'LEFT_EYE').position.y;
-  const rightEyeY = face.landmarks.find(e => e.type === 'RIGHT_EYE').position.y;
+  const eyeCenter = face.landmarks.find(e => e.type === 'MIDPOINT_BETWEEN_EYES').position;
   const noseTip = face.landmarks.find(e => e.type=== 'NOSE_TIP').position;
-  const distance = .25 * leftEyeY + .25 * rightEyeY + .5 * noseTip.y;
   const angle = getAngleBetweenEyes(face);
-  const noseTipXLocationRatio = noseTip.x / image.bitmap.width;
-  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width * noseTipXLocationRatio);
-  return distance + imageOffset;
+  const {x, y} = getCenterOfTwoPoints(eyeCenter, noseTip, angle);
+  return y;
 }
 
 function moneybrotherfy(imageFile, face) {
