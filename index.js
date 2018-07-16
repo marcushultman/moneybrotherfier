@@ -28,12 +28,11 @@ function distanceToMustasche(image, face) {
 function distanceToNosebone(image, face) {
   const leftEyeY = face.landmarks.find(e => e.type === 'LEFT_EYE').position.y;
   const rightEyeY = face.landmarks.find(e => e.type === 'RIGHT_EYE').position.y;
-  const lip = face.landmarks.find(e => e.type=== 'UPPER_LIP').position;
-  const distance = .25 * leftEyeY + .25 * rightEyeY + .5 * lip.y;
-
+  const noseTip = face.landmarks.find(e => e.type=== 'NOSE_TIP').position;
+  const distance = .25 * leftEyeY + .25 * rightEyeY + .5 * noseTip.y;
   const angle = getAngleBetweenEyes(face);
-  const lipXLocationRatio = lip.x / image.bitmap.width;
-  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width * lipXLocationRatio);
+  const noseTipXLocationRatio = noseTip.x / image.bitmap.width;
+  const imageOffset = Math.abs(Math.tan(angle) * image.bitmap.width * noseTipXLocationRatio);
   return distance + imageOffset;
 }
 
