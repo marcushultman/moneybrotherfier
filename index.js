@@ -25,8 +25,11 @@ function getOffsettedYForPos({ x, y }, face) {
 }
 
 function distanceToMustasche(image, face) {
+  const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
   const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
-  return getOffsettedYForPos(lip, face);
+
+  const mustasche = add2(mul(.5, noseTip), mul(.5, lip));
+  return getOffsettedYForPos(mustasche, face);
 }
 
 function distanceToNosebone(image, face) {
