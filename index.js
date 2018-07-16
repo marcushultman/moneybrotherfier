@@ -31,15 +31,12 @@ function moneybrotherfy(imageFile, face) {
   const angleInRadians = getAngleBetweenEyes(face);
   const angle = angleInRadians * 180 / Math.PI;
   const outFile = `${imageFile}-brother.jpg`;
-  const maxSize = { width : 640, height : 640 };
   return new Promise((resolve, reject) => jimp.read(imageFile, (err, brother) => {
     err ? reject(err) : resolve(brother);
   }))
   .then(image => new Promise((resolve, reject) => {
     const { width, height } = image.bitmap;
-    const isLandscape = width > height;
     image
-      .resize(isLandscape ? maxSize.width : jimp.AUTO, isLandscape ? jimp.AUTO : maxSize.height)
       .rotate(-angle, true)
       .blit(image.clone(), 0, getCenterOfTwoPoints(eyeCenter, noseTip, angleInRadians).y, 0, getCenterOfTwoPoints(noseTip, lip, angleInRadians).y, width, height)
       .rotate(angle, true)
