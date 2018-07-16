@@ -24,12 +24,24 @@ function getCenterOfTwoPoints(p1, p2, angle){
   return { x: averageX, y: baseY + imageOffset};
 }
 
-function moneybrotherfy(imageFile, face) {
+function distanceToMustasche(image, face) {
+  const noseTip = face.landmarks.find(e => e.type === 'NOSE_TIP').position;
+  const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
+  const angle = getAngleBetweenEyes(face);
+  const {x, y} = getCenterOfTwoPoints(noseTip, lip, angle);
+  return y;
+}
+
+function distanceToNosebone(image, face) {
   const eyeCenter = face.landmarks.find(e => e.type === 'MIDPOINT_BETWEEN_EYES').position;
   const noseTip = face.landmarks.find(e => e.type=== 'NOSE_TIP').position;
-  const lip = face.landmarks.find(e => e.type === 'UPPER_LIP').position;
-  const angleInRadians = getAngleBetweenEyes(face);
-  const angle = angleInRadians * 180 / Math.PI;
+  const angle = getAngleBetweenEyes(face);
+  const {x, y} = getCenterOfTwoPoints(eyeCenter, noseTip, angle);
+  return y;
+}
+
+function moneybrotherfy(imageFile, face) {
+  const angle = getAngleBetweenEyes(face) * 180 / Math.PI;
   const outFile = `${imageFile}-brother.jpg`;
   const maxSize = { width : 640, height : 640 };
   return new Promise((resolve, reject) => jimp.read(imageFile, (err, brother) => {
@@ -41,7 +53,7 @@ function moneybrotherfy(imageFile, face) {
     image
       .resize(isLandscape ? maxSize.width : jimp.AUTO, isLandscape ? jimp.AUTO : maxSize.height)
       .rotate(-angle, true)
-      .blit(image.clone(), 0, getCenterOfTwoPoints(eyeCenter, noseTip, angleInRadians).y, 0, getCenterOfTwoPoints(noseTip, lip, angleInRadians).y, width, height)
+      .blit(image.clone(), 0, distanceToNosebone(image, face), 0, distanceToMustasche(image, face), width, height)
       .rotate(angle, true)
       .autocrop()
       .write(outFile, () => resolve(image));
