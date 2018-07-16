@@ -51,16 +51,12 @@ function moneybrotherfy(imageFile, face) {
     const scale = Math.min(Math.max(width, height) / IMAGE_MAX_SIZE, 1.0);
     width *= scale;
     height *= scale;
+    const cutStart = noseboneYPos(face, scale);
+    const cutEnd = mustascheYPos(face, scale);
     image
       .resize(width, height)
       .rotate(-angle, true)
-      .blit(image.clone(),
-            0,
-            noseboneYPos(face, scale),
-            0,
-            mustascheYPos(face, scale),
-            width,
-            height)
+      .blit(image.clone(), 0, cutStart, 0, cutEnd, width, height)
       .rotate(angle, true)
       .autocrop()
       .write(outFile, () => resolve(image));
