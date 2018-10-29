@@ -64,24 +64,24 @@ function moneybrotherfy(imageFile, face) {
   .then(() => outFile);
 }
 
-app.post('/transform', upload.single('brother'), (req, res, next) => {
+const tryOrNext = handler => (req, res, next) => Promise.resolve(resolve => resolve(handler(req, res, next))).catch(next);
+
+app.post('/transform', upload.single('brother'), tryOrNext(async (req, res, next) => {
   const filename = req.file.path;
-  client.faceDetection({ image: { source: { filename }}})
-  .then(results => {
-    if (!results.length) {
-      throw new Error('no results');
-    }
-    const faces = results[0].faceAnnotations;
-    console.log('Found ' + faces.length + (faces.length === 1 ? ' face' : ' faces'));
-    if (!faces.length) {
-      throw new Error('no brother');
-    }
-    return faces[0];
-  })
-  .then(face => moneybrotherfy(filename, face))
-  .then(file => res.sendFile(file))
-  .catch(err => next(err));
-});
+  console.log(filename);
+  const results = await client.faceDetection({ image: { source: { filename }}})
+  console.log(results);
+  if (!results.length) {
+    throw new Error('no results');
+  }
+  const faces = results[0].faceAnnotations;
+  console.log('Found ' + faces.length + (faces.length === 1 ? ' face' : ' faces'));
+  if (!faces.length) {
+    throw new Error('no brother');
+  }
+  const outfile = moneybrotherfy(filename, faces[0]);
+  res.sendFile(outfile);
+}));
 
 app.use(express.static('src'));
 
