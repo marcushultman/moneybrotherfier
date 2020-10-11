@@ -1,5 +1,6 @@
 const express = require('express');
 const multer  = require('multer');
+const rateLimit = require("express-rate-limit");
 const vision = require('@google-cloud/vision');
 
 const jimp = require("jimp");
@@ -64,7 +65,12 @@ function moneybrotherfy(imageFile, face) {
   .then(() => outFile);
 }
 
-app.post('/transform', upload.single('brother'), (req, res, next) => {
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
+app.post('/transform', limiter, upload.single('brother'), (req, res, next) => {
   const filename = req.file.path;
   client.faceDetection({ image: { source: { filename }}})
   .then(results => {
